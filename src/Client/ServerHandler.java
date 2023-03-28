@@ -3,8 +3,11 @@ package Client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServerHandler implements Runnable{
+
     Client client;
     public ServerHandler(Client client){
             this.client=client;

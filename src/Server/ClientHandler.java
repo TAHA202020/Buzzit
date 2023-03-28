@@ -2,6 +2,7 @@ package Server;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 public class ClientHandler implements Runnable {
     Serveur server;
@@ -22,34 +23,42 @@ public class ClientHandler implements Runnable {
             System.out.println(e.getMessage());;
         }
     }
-    public void handleInitialize(Author author) throws Exception
+    public void handleInitialize(String name) throws Exception
     {
-        int count=0;
+        boolean exists=false;
         for (ClientHandler cl: server.clients)
         {
-            if (cl.author.name.equals(author.name))
-            {
-                count=count+1;
-            }
+            if (cl.author!=null)
+                if (cl.author.name.equals(name))
+                {
+                    exists=true;
+                }
         }
-        if (count>1)
+        if (exists)
         {
             sendMessage("CLOSE","Name already in use please change it");
-            System.out.println("Name: "+author.name+" already in use please change it");
+            System.out.println("Name: "+name+" already in use please change it");
             client.getOutputStream().close();
             client.getInputStream().close();
             client.close();
         }
         else {
-            server.authors.add(author);
+            for (Author author1: server.authors)
+                if (author1.name.equals(name))
+                    this.author=author1;
+            if (this.author==null)
+            {
+                this.author=new Author(name);
+                server.authors.add(author);
+            }
             System.out.println(author.name + " connected");
         }
     }
     public void handlePublish(Message message)
     {
-        System.out.println("handling publish");
         server.messages.add(message);
-        for (Tag messagetags:message.getTag())
+        List<Tag> tags=message.getTag();
+        for (Tag messagetags:tags)
         {
             Tag tag=server.getTag(messagetags.tag);
             if (tag!=null)
@@ -58,11 +67,10 @@ public class ClientHandler implements Runnable {
             }else
             {
                 server.tags.add(messagetags);
-                System.out.println("added tag");
             }
         }
         author.notifySubscribers(message.getMessage());
-        System.out.println("tags:" +server.tags);
+        sendMessage("MESSAGE", message.getMessage());
     }
 
     public void HandleRequest(String header, String body)throws Exception
@@ -71,8 +79,8 @@ public class ClientHandler implements Runnable {
         switch (headers[0])
         {
             case "Initialize":
-                author=new Author(headers[1].split("@")[1]);
-                handleInitialize(author);
+                String name=headers[1].split("@")[1];
+                handleInitialize(name);
                 break;
             case "PUBLISH" :
                 handlePublish(new Message(body));
@@ -88,6 +96,7 @@ public class ClientHandler implements Runnable {
                     {
                         tag.addSubscribers(this);
                     }
+                    System.out.println("Tag does not Exist");
                 }
                 else
                 {
@@ -99,6 +108,21 @@ public class ClientHandler implements Runnable {
                     }
                 }
                 break;
+            case "GETTAGS":
+                System.out.println("getting tags");
+                String toSend="";
+                for(Tag tag: server.tags)
+                    toSend=toSend+" "+tag.tag;
+                sendMessage("RESPONSE",toSend);
+                break;
+            case "GETUSERS":
+                System.out.println("getting users");
+                String Users="";
+                for(Author author1: server.authors)
+                    Users=Users+" "+author1.name;
+                sendMessage("RESPONSE",Users);
+                break;
+
         }
     }
     @Override

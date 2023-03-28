@@ -1,8 +1,12 @@
 package Client;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Client {
+    List<String> tags=new ArrayList<>();
+    List<String> users=new ArrayList<>();
     String nom;
     Socket socket;
     public Client(String nom,int port)
@@ -24,9 +28,10 @@ public class Client {
     }
     public void startChat() throws IOException {
         sendRequest(new InitializeRequest(nom,""));
-        sendRequest(new PublishRequest(nom,"Hello #mama "+nom));
-        sendRequest(new SubscribeTagRequest("mama"));
-        sendRequest(new PublishRequest(nom,"Hello #mama "+nom));
+        sendRequest(new PublishRequest(nom,"#dimaraja"));
+        System.out.println("sending tags request");
+        sendRequest(new GetTags());
+        sendRequest(new GetUsers());
     }
 
     public static void main(String[] args) throws IOException {
@@ -34,9 +39,5 @@ public class Client {
         Thread thread =new Thread(new ServerHandler(client));
         thread.start();
         client.startChat();
-        Client client1=new Client("saad",8000);
-        Thread thread1 =new Thread(new ServerHandler(client1));
-        thread1.start();
-        client1.startChat();
     }
 }

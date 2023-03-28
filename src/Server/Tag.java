@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Tag {
     List<ClientHandler> subscribers=new ArrayList<>();
-    final String tag;
+    String tag="";
     public Tag(String tag)
     {
         this.tag=tag;
