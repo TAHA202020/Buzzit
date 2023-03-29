@@ -36,11 +36,8 @@ public class ClientHandler implements Runnable {
         }
         if (exists)
         {
-            sendMessage("CLOSE","Name already in use please change it");
+            sendMessage("Initialize","ERROR");
             System.out.println("Name: "+name+" already in use please change it");
-            client.getOutputStream().close();
-            client.getInputStream().close();
-            client.close();
         }
         else {
             for (Author author1: server.authors)
@@ -51,6 +48,7 @@ public class ClientHandler implements Runnable {
                 this.author=new Author(name);
                 server.authors.add(author);
             }
+            sendMessage("Initialize","OK");
             System.out.println(author.name + " connected");
         }
     }

@@ -27,7 +27,13 @@ public class Message {
             }
         }
     }
-
+    public boolean containsTag(String hashtag)
+    {
+        for (Tag tag:tags)
+            if (tag.tag.equals(hashtag))
+                return true;
+        return false;
+    }
     public List<Tag> getTag() {
         return tags;
     }

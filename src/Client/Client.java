@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Client {
     List<String> tags=new ArrayList<>();
@@ -27,17 +28,23 @@ public class Client {
         return socket;
     }
     public void startChat() throws IOException {
-        sendRequest(new InitializeRequest(nom,""));
+
         sendRequest(new PublishRequest(nom,"#dimaraja"));
-        System.out.println("sending tags request");
         sendRequest(new GetTags());
         sendRequest(new GetUsers());
     }
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
 
-    public static void main(String[] args) throws IOException {
-        Client client=new Client("taha",8000);
-        Thread thread =new Thread(new ServerHandler(client));
+    public static void main(String[] args) throws Exception {
+        System.out.println("Please enter your name");
+        Scanner scanner=new Scanner(System.in);
+        String name= scanner.nextLine();
+        Client client=new Client(name,8000);
+        ServerHandler serverHandler=new ServerHandler(client);
+        Thread thread =new Thread(serverHandler);
         thread.start();
-        client.startChat();
+        Userinterface.Start(client,serverHandler);
     }
 }
