@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tag {
-    List<ClientHandler> subscribers=new ArrayList<>();
+    List<Author> subscribers=new ArrayList<>();
     String tag="";
     public Tag(String tag)
     {
@@ -18,13 +18,14 @@ public class Tag {
     }
     public void notifySubscribers(String message)
     {
-        for (ClientHandler cl:subscribers)
+        for (Author cl:subscribers)
         {
-            cl.sendMessage("NOTIFY tag:#"+tag,message);
+            cl.cl.sendMessage("NOTIFY tag:#"+tag,message);
         }
     }
 
-    public void addSubscribers(ClientHandler subscriber) {
+    public void addSubscribers(Author subscriber) {
         this.subscribers.add(subscriber);
     }
+    public void removeSubscriber(Author sub){this.subscribers.remove(this);}
 }

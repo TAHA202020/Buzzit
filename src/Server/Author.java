@@ -21,6 +21,7 @@ public class Author {
     {
         subsribers.add(client);
     }
+    public void removeSubscriber(Author sub){subsribers.remove(sub);}
     public void addMessage(Message message)
     {
         messages.add(message);

@@ -5,10 +5,12 @@ import java.util.List;
 
 public class Message {
     private List<Tag> tags=new ArrayList<>();
+    Author author;
     int id;
     private final String message;
 
-    public Message(String message,int id) {
+    public Message(String message,int id,Author author) {
+        this.author=author;
         this.id=id;
         this.message = message;
         ParseTags();

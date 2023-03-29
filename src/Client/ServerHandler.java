@@ -31,9 +31,12 @@ public class ServerHandler implements Runnable{
                 client.getSocket().close();
                 break;
             case "NOTIFY":
-                System.out.println(body);
+                Userinterface.ServerSaid(body);
                 break;
-            default:
+            case "REPLY":
+                Userinterface.ServerSaid(body);
+                break;
+                default:
                 lastRepsonse=body;
                 synchronized (this)
                 {

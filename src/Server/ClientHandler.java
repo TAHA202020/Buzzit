@@ -83,7 +83,7 @@ public class ClientHandler implements Runnable {
                 handleInitialize(name);
                 break;
             case "PUBLISH" :
-                handlePublish(new Message(body,server.messages.size()+1));
+                handlePublish(new Message(body,server.messages.size()+1,this.author));
                 break;
             case "SUBSCRIBE":
                 String tagauthor;
@@ -91,12 +91,16 @@ public class ClientHandler implements Runnable {
                 {
                     tagauthor=headers[1].split("#")[1];
                     Tag tag=server.getTag(tagauthor);
-                    System.out.println(tag);
                     if (tag!=null)
                     {
-                        tag.addSubscribers(this);
+                        tag.addSubscribers(author);
+                        sendMessage("REPONSE","OK");
                     }
-                    System.out.println("Tag does not Exist");
+                    else
+                    {
+                        sendMessage("REPONSE","ERROR");
+                    }
+
                 }
                 else
                 {
@@ -113,17 +117,49 @@ public class ClientHandler implements Runnable {
                     }
                 }
                 break;
+            case "UNSUBSCRIBE":
+                if (headers[1].contains("#"))
+                {
+                    tagauthor=headers[1].split("#")[1];
+                    Tag tag=server.getTag(tagauthor);
+                    if (tag!=null)
+                    {
+                        tag.removeSubscriber(author);
+                        sendMessage("REPONSE","OK");
+                    }
+                    else
+                    {
+                        sendMessage("REPONSE","ERROR");
+                    }
+
+                }
+                else
+                {
+                    tagauthor=headers[1].split("@")[1];
+                    Author author =server.getAuthor(tagauthor);
+                    if (author!=null)
+                    {
+                        author.removeSubscriber(this.author);
+                        sendMessage("REPONSE","OK");
+                    }
+                    else
+                    {
+                        sendMessage("REPONSE","ERROR");
+                    }
+                }
+
             case "GETTAGS":
                 System.out.println("getting tags");
                 String toSend="";
+                int i=1;
                 for(Tag tag: server.tags)
-                    toSend=toSend+" "+tag.tag;
+                    toSend=toSend+i+"-"+tag.tag+" ";
                 sendMessage("RESPONSE",toSend);
                 break;
             case "GETUSERS":
                 System.out.println("getting users");
                 String Users="";
-                int i=1;
+                i=1;
                 for(Author author1: server.authors) {
 
                     if (!author1.name.equals(author.name))
@@ -192,6 +228,20 @@ public class ClientHandler implements Runnable {
                             break;
                     }
                     sendMessage("RCV_IDS",res);
+                    break;
+            case "RCV_MSG":
+                int idtoget=Integer.parseInt(headers[1].split(":")[1]);
+                sendMessage("RCV_IDS",idtoget+":"+server.messages.get(idtoget-1).getMessage());
+                break;
+            case "REPLY":
+                author=headers[1].split("@")[1];
+                id=headers[2].split(":")[1];
+                idtoget=Integer.parseInt(id);
+                server.messages.add(new Message(body,server.messages.size()+1,this.author));
+                String response=author+" Responded to "+server.messages.get(idtoget-1).getMessage()+"--------->"+body;
+                server.messages.get(idtoget-1).author.cl.sendMessage("REPLY",response);
+                sendMessage("RESPONSE","Response Sent");
+                break;
         }
     }
     @Override
