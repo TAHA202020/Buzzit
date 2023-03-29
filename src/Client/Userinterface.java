@@ -128,6 +128,9 @@ public class Userinterface {
             serverHandler.wait();
         }
         String res=serverHandler.lastRepsonse;
+        System.out.println(res);
+        if (res.isEmpty())
+            return;
         String[] ids=res.split(" ");
         for (String idd:ids)
         {
@@ -183,8 +186,16 @@ public class Userinterface {
     }
     public static void Reply_MEssage(Client client, ServerHandler serverHandler,int id,String message) throws Exception
     {
-        //change classe
         client.sendRequest(new ReplyRequest(client.nom,id,message));
+        synchronized (serverHandler)
+        {
+            serverHandler.wait();
+        }
+        String res=serverHandler.lastRepsonse;
+        ServerSaid(res);
+    }
+    public static void Republish(Client client,ServerHandler serverHandler,String id)throws Exception{
+        client.sendRequest(new RepublishRequest(client.nom,id));
         synchronized (serverHandler)
         {
             serverHandler.wait();
@@ -205,6 +216,8 @@ public class Userinterface {
             System.out.println("4-subscribe to Tag");
             System.out.println("5-unsubscribe Tag");
             System.out.println("6-Reply to message");
+            System.out.println("7-Unsubscribe user");
+            System.out.println("8-Republish a message");
             int response=getUSerinputint();
             switch (response)
             {
@@ -256,7 +269,19 @@ public class Userinterface {
                     String message=getUSerinput();
                     Reply_MEssage(client,serverHandler,idd,message);
                     break;
-
+                case 7:
+                    System.out.println("getting users you subbed to");
+                    System.out.println(client.users);
+                    System.out.println("select user you want to unsub from");
+                    String user=getUSerinput();
+                    UnsibscribeUser(client,serverHandler,user);
+                    System.out.println(client.tags);
+                    break;
+                case 8:
+                    System.out.println("Type id to republish");
+                    id=getUSerinput();
+                    Republish(client,serverHandler,id);
+                    break;
 
 
             }

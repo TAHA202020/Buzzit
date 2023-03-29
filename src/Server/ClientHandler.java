@@ -168,6 +168,7 @@ public class ClientHandler implements Runnable {
                 sendMessage("GETUSERS",Users);
                 break;
             case "RCV_IDS":
+                System.out.println(header);
                 String author=null;
                 String tag=null;
                 String id=null;
@@ -178,7 +179,7 @@ public class ClientHandler implements Runnable {
                         author=param.split("@")[1];
                     if (param.startsWith("tag"))
                         tag=param.split("#")[1];
-                    if (param.startsWith("id"))
+                    if (param.startsWith("since_id"))
                         id=param.split(":")[1];
                     if (param.startsWith("limit"))
                         limit=param.split(":")[1];
@@ -189,25 +190,31 @@ public class ClientHandler implements Runnable {
                 if (limit==null)
                     max=5;
                 else
-                    max=Integer.parseInt(limit);
+                    max = Integer.parseInt(limit);
+                System.out.println(limit);
                 if (id!=null)
                 {
-                    id_start=Integer.parseInt(id);
+                    id_start=Integer.parseInt(id)-1;
                 }
                 if (author!=null)
                 {
                     Author auth=server.getAuthor(author);
+                    System.out.println(auth.messages);
                     for (Message message:auth.messages)
                     {
                         if (tag!=null)
                         {
-                            if (message.containsTag(tag)&& message.id>=id_start)
-                                res=res+message.id+" ";
+                            if (message.containsTag(tag)&& message.id>=id_start) {
+                                res = res +message.id + " ";
+                                max--;
+                            }
                         }
                         else
-                            if (message.id>=id_start)
-                                res=res+message.id+" ";
-                        max--;
+                            if (message.id>=id_start) {
+                                res = res +message.id+ " ";
+                                max--;
+                            }
+
                         if (max==0)
                             break;
                     }
@@ -215,15 +222,19 @@ public class ClientHandler implements Runnable {
                 else
                     for (i=id_start;i<server.messages.size();i++)
                     {
+                        System.out.println(server.messages);
                         if (tag!=null)
                         {
-                            if (server.messages.get(i).containsTag(tag)&& server.messages.get(i).id>=id_start)
-                                res=res+server.messages.get(i).id+" ";
+                            if (server.messages.get(i).containsTag(tag)&& server.messages.get(i).id>=id_start){
+                                res = res + server.messages.get(i).id+ " ";
+                                max--;
+                            }
                         }
                         else
-                        if (server.messages.get(i).id>=id_start)
-                            res=res+server.messages.get(i).id+" ";
-                        max--;
+                        if (server.messages.get(i).id>=id_start) {
+                            res = res +server.messages.get(i).id+" ";
+                            max--;
+                        }
                         if (max==0)
                             break;
                     }
@@ -242,6 +253,11 @@ public class ClientHandler implements Runnable {
                 server.messages.get(idtoget-1).author.cl.sendMessage("REPLY",response);
                 sendMessage("RESPONSE","Response Sent");
                 break;
+            case "REPUBLISH":
+                id=headers[2].split(":")[1];
+                Message msg=server.messages.get(Integer.parseInt(id)-1);
+                this.author.notifySubscribers(this.author.name+" REPUBLISHED: "+msg.getMessage());
+                sendMessage("REPUBLISH","Republished:"+msg.getMessage());
         }
     }
     @Override

@@ -10,7 +10,7 @@ public class ReceiveIds extends Request{
         if (id!=null)
             header=header+" since_id:"+id;
         if (limit!=null)
-            header=header+" since_id:"+id;
+            header=header+" limit:"+limit;
         else
             header=header+" limit:"+5;
     }
