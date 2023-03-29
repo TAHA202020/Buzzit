@@ -29,18 +29,20 @@ public class ServerHandler implements Runnable{
         {
             case "CLOSE":
                 client.getSocket().close();
+                break;
+            case "NOTIFY":
                 System.out.println(body);
                 break;
-            case "Initialize":
+            default:
                 lastRepsonse=body;
+                synchronized (this)
+                {
+                    notify();
+                }
                 break;
 
         }
-        System.out.println(lastRepsonse);
-        synchronized (this)
-        {
-            notify();
-        }
+
     }
     @Override
     public void run() {

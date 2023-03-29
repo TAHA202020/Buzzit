@@ -5,9 +5,11 @@ import java.util.List;
 
 public class Message {
     private List<Tag> tags=new ArrayList<>();
+    int id;
     private final String message;
 
-    public Message(String message) {
+    public Message(String message,int id) {
+        this.id=id;
         this.message = message;
         ParseTags();
     }

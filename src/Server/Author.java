@@ -4,14 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Author {
+    ClientHandler cl;
     String name;
     List<Message> messages=new ArrayList<>();
-    List<ClientHandler> subsribers=new ArrayList<>();
+    List<Author> subsribers=new ArrayList<>();
     public Author(String name)
     {
         this.name=name;
     }
-    public void addSubscriber(ClientHandler client)
+
+    public void setCl(ClientHandler cl) {
+        this.cl = cl;
+    }
+
+    public void addSubscriber(Author client)
     {
         subsribers.add(client);
     }
@@ -21,9 +27,9 @@ public class Author {
     }
     public void notifySubscribers(String message)
     {
-        for (ClientHandler subscriber:subsribers)
+        for (Author subscriber:subsribers)
         {
-            subscriber.sendMessage("NOTIFY",message);
+            subscriber.cl.sendMessage("NOTIFY",name+" said :"+message);
         }
     }
 

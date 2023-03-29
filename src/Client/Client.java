@@ -27,12 +27,7 @@ public class Client {
     public Socket getSocket() {
         return socket;
     }
-    public void startChat() throws IOException {
 
-        sendRequest(new PublishRequest(nom,"#dimaraja"));
-        sendRequest(new GetTags());
-        sendRequest(new GetUsers());
-    }
     public void setNom(String nom) {
         this.nom = nom;
     }

@@ -20,7 +20,7 @@ public class ClientHandler implements Runnable {
         try {
             client.getOutputStream().write((header+"\r\n"+body+"\r\n").getBytes());
         } catch (Exception e) {
-            System.out.println(e.getMessage());;
+            System.out.println(e.getMessage());
         }
     }
     public void handleInitialize(String name) throws Exception
@@ -48,6 +48,7 @@ public class ClientHandler implements Runnable {
                 this.author=new Author(name);
                 server.authors.add(author);
             }
+            author.setCl(this);
             sendMessage("Initialize","OK");
             System.out.println(author.name + " connected");
         }
@@ -67,8 +68,9 @@ public class ClientHandler implements Runnable {
                 server.tags.add(messagetags);
             }
         }
+        author.addMessage(message);
         author.notifySubscribers(message.getMessage());
-        sendMessage("MESSAGE", message.getMessage());
+        sendMessage("MESSAGE", "OK");
     }
 
     public void HandleRequest(String header, String body)throws Exception
@@ -81,7 +83,7 @@ public class ClientHandler implements Runnable {
                 handleInitialize(name);
                 break;
             case "PUBLISH" :
-                handlePublish(new Message(body));
+                handlePublish(new Message(body,server.messages.size()+1));
                 break;
             case "SUBSCRIBE":
                 String tagauthor;
@@ -102,7 +104,12 @@ public class ClientHandler implements Runnable {
                     Author author =server.getAuthor(tagauthor);
                     if (author!=null)
                     {
-                        author.addSubscriber(this);
+                        author.addSubscriber(this.author);
+                        sendMessage("REPONSE","OK");
+                    }
+                    else
+                    {
+                        sendMessage("REPONSE","ERROR");
                     }
                 }
                 break;
@@ -116,11 +123,75 @@ public class ClientHandler implements Runnable {
             case "GETUSERS":
                 System.out.println("getting users");
                 String Users="";
-                for(Author author1: server.authors)
-                    Users=Users+" "+author1.name;
-                sendMessage("RESPONSE",Users);
-                break;
+                int i=1;
+                for(Author author1: server.authors) {
 
+                    if (!author1.name.equals(author.name))
+                        Users = Users+i+"-"+author1.name+" ";
+                }
+                sendMessage("GETUSERS",Users);
+                break;
+            case "RCV_IDS":
+                String author=null;
+                String tag=null;
+                String id=null;
+                String limit=null;
+                for (String param:headers)
+                {
+                    if (param.startsWith("author"))
+                        author=param.split("@")[1];
+                    if (param.startsWith("tag"))
+                        tag=param.split("#")[1];
+                    if (param.startsWith("id"))
+                        id=param.split(":")[1];
+                    if (param.startsWith("limit"))
+                        limit=param.split(":")[1];
+                }
+                String res="";
+                int max;
+                int id_start=0;
+                if (limit==null)
+                    max=5;
+                else
+                    max=Integer.parseInt(limit);
+                if (id!=null)
+                {
+                    id_start=Integer.parseInt(id);
+                }
+                if (author!=null)
+                {
+                    Author auth=server.getAuthor(author);
+                    for (Message message:auth.messages)
+                    {
+                        if (tag!=null)
+                        {
+                            if (message.containsTag(tag)&& message.id>=id_start)
+                                res=res+message.id+" ";
+                        }
+                        else
+                            if (message.id>=id_start)
+                                res=res+message.id+" ";
+                        max--;
+                        if (max==0)
+                            break;
+                    }
+                }
+                else
+                    for (i=id_start;i<server.messages.size();i++)
+                    {
+                        if (tag!=null)
+                        {
+                            if (server.messages.get(i).containsTag(tag)&& server.messages.get(i).id>=id_start)
+                                res=res+server.messages.get(i).id+" ";
+                        }
+                        else
+                        if (server.messages.get(i).id>=id_start)
+                            res=res+server.messages.get(i).id+" ";
+                        max--;
+                        if (max==0)
+                            break;
+                    }
+                    sendMessage("RCV_IDS",res);
         }
     }
     @Override
