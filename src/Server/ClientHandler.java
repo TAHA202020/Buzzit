@@ -195,6 +195,7 @@ public class ClientHandler implements Runnable {
                 if (id!=null)
                 {
                     id_start=Integer.parseInt(id)-1;
+                    System.out.println(id_start);
                 }
                 if (author!=null)
                 {
@@ -202,6 +203,7 @@ public class ClientHandler implements Runnable {
                     System.out.println(auth.messages);
                     for (Message message:auth.messages)
                     {
+                        System.out.println(message.id);
                         if (tag!=null)
                         {
                             if (message.containsTag(tag)&& message.id>=id_start) {
@@ -209,11 +211,12 @@ public class ClientHandler implements Runnable {
                                 max--;
                             }
                         }
-                        else
-                            if (message.id>=id_start) {
-                                res = res +message.id+ " ";
+                        else {
+                            if (message.id >= id_start) {
+                                res = res + message.id + " ";
                                 max--;
                             }
+                        }
 
                         if (max==0)
                             break;
@@ -225,13 +228,12 @@ public class ClientHandler implements Runnable {
                         System.out.println(server.messages);
                         if (tag!=null)
                         {
-                            if (server.messages.get(i).containsTag(tag)&& server.messages.get(i).id>=id_start){
+                            if (server.messages.get(i).containsTag(tag)){
                                 res = res + server.messages.get(i).id+ " ";
                                 max--;
                             }
                         }
-                        else
-                        if (server.messages.get(i).id>=id_start) {
+                        else {
                             res = res +server.messages.get(i).id+" ";
                             max--;
                         }
