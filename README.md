@@ -1,3 +1,2 @@
 Développeurs :
-Taha Jayche 
-Ayyoub Touigir
+Taha Jayche-Ayyoub Touigir
